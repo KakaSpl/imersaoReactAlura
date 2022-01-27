@@ -2,24 +2,55 @@ import { Box, Text, TextField, Image, Button } from '@skynexui/components';
 import React from 'react';
 import appConfig from '../config.json';
 
+import { createClient } from '@supabase/supabase-js';
+
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzMxNzg5MCwiZXhwIjoxOTU4ODkzODkwfQ.OUgNae0_-7WaOwTSZ9uO3PexccS_41EoQha1mZ3y2RQ';
+const SUPABASE_URL = 'https://pvpioznredgfgyvhcook.supabase.co';
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+
+
 export default function ChatPage() {
     // Sua lógica vai aqui
     const [mensagem, setMensagem] = React.useState('');
     const [listaDeMensagens, setListaMensagens] = React.useState([]);
+
+    React.useEffect(() => {
+        const dadosDoSupabase = supabaseClient
+            .from('mensagens')
+            .select('*')
+            .order('id', { ascending: false })
+            .then(( data ) => {
+                console.log('Dados da consulta:', data);
+                setListaMensagens(data);
+            });
+    }, [listaDeMensagens]);
+
     function handleNovaMensagem(novaMensagem){
         const mensagem = {
-            id: listaDeMensagens.length + 1,
+            // id: listaDeMensagens.length + 1,
             de: 'KakaSpl',
             texto: novaMensagem,
         }
-        setListaMensagens([
-            mensagem,
-            ...listaDeMensagens,
-            novaMensagem
-        ]);
+
+        supabaseClient
+            .from('mensagens')
+            .insert([
+                mensagem
+            ])
+            .then(( data ) => {
+                setListaMensagens([
+                    data(0),
+                    ...listaDeMensagens,
+                    novaMensagem
+                ]);
+            });
+
+        
         setMensagem('');
     }
     // ./Sua lógica vai aqui
+
     return (
         <Box
             styleSheet={{
@@ -167,7 +198,7 @@ function MessageList(props) {
                                 display: 'inline-block',
                                 marginRight: '8px',
                             }}
-                            src={`https://github.com/KakaSpl.png`}
+                            src={`https://github/${mensagem.de}.png`}
                         />
                         <Text tag="strong">
                             {mensagem.de}
