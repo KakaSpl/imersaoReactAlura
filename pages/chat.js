@@ -21,13 +21,14 @@ export default function ChatPage() {
 
     function escutaMensagemTempoReal(adicionaMensagem) {
         return supabaseClient
-            .from['mensagens']
-            .on('INSERT', ({ respostaLive }) => {
+            .from('mensagens')
+            .on('INSERT', ( respostaLive ) => {
                 adicionaMensagem(respostaLive.new);
             })
             .subscribe();
     }
-
+    
+    escutaMensagemTempoReal
     React.useEffect(() => {
         const dadosDoSupabase = supabaseClient
             .from('mensagens')
